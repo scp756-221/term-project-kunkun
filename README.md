@@ -2,13 +2,13 @@
 # tprj
 Term Project repo
 
-# Git workflow
+## Git workflow
 All the group members in Kunkun need to follow this git workflow.
 
-## Cloning and forking the repository
+### Cloning and forking the repository
  <code>git clone <i>clone-url</i></code>
 
-## Add features 
+### Add features 
 Before you make any changes, you should make a branch. Remember to **never
 commit to master**. The command `git status` will tell you what branch you are
 on. 
