@@ -97,29 +97,6 @@ def read_comment_text(comment_id):
     return {'text': oa}
 
 
-@bp.route('/write_comment_text/<comment_id>', methods=['PUT'])
-def write_comment_text(comment_id):
-    headers = request.headers
-    # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}),
-                        status=401,
-                        mimetype='application/json')
-    try:
-        content = request.get_json()
-        text = content['text']
-    except Exception:
-        return json.dumps({"message": "error reading arguments"})
-    payload = {"objtype": "comment", "objkey": comment_id}
-    url = db['name'] + '/' + db['endpoint'][3]
-    response = requests.put(
-        url,
-        params=payload,
-        json={"text": text},
-        headers={'Authorization': headers['Authorization']})
-    return (response.json())
-
-
 @bp.route('/', methods=['POST'])
 def create_comment():
     """

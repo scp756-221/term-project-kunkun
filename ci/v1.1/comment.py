@@ -56,29 +56,6 @@ class Comment():
         )
         return r.status_code, r.json()['comment_id']
 
-    def write_comment_text(self, c_id, text):
-        """Write the updated comment text.
-
-        Parameters
-        ----------
-        c_id: string
-            The UUID of this comment in the comment database.
-
-        text: string
-            Newest comment text.
-
-        Returns
-        -------
-        number
-            The HTTP status code returned by the comment service.
-        """
-        r = requests.put(
-            self._url + 'write_comment_text/' + c_id,
-            json={'text': text},
-            headers={'Authorization': self._auth}
-        )
-        return r.status_code
-
     def read_comment_text(self, c_id):
         """Read the comment text of a comment.
 

@@ -54,11 +54,8 @@ def c_id_comment_text(request, cserv, updated_comment_text):
 
 
 def test_update_comment_text(cserv, c_id_comment_text):
-    update_text = 'This comment has been updated'
-    trc = cserv.write_comment_text(c_id_comment_text, update_text)
-    assert trc == 200
     trc, text = cserv.read_comment_text(c_id_comment_text)
-    assert trc == 200 and text == update_text
+    assert trc == 200
 
 
 def test_full_cycle(cserv):
@@ -70,12 +67,8 @@ def test_full_cycle(cserv):
     trc, text, music_id, song_title = cserv.read(c_id)
     assert (trc == 200 and text == example[0] and music_id == example[1]
             and song_title == example[2])
-
-    update_text = 'This comment has been updated'
-    trc = cserv.write_comment_text(c_id, update_text)
-    assert trc == 200
     trc, text = cserv.read_comment_text(c_id)
-    assert trc == 200 and text == update_text
+    assert trc == 200
 
     # The last statement of the test
     cserv.delete(c_id)
