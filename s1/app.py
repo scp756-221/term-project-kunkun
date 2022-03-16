@@ -168,13 +168,13 @@ def logoff():
 # All database calls will have this prefix.  Prometheus metric
 # calls will not---they will have route '/metrics'.  This is
 # the conventional organization.
+# change for test
 app.register_blueprint(bp, url_prefix='/api/v1/user/')
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         logging.error("Usage: app.py <service-port>")
         sys.exit(-1)
-
 
     p = int(sys.argv[1])
     # Do not set debug=True---that will disable the Prometheus metrics
