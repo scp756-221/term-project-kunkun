@@ -37,6 +37,7 @@ jobs:
       - name: Instantiate template files
         # For CI, only need ZZ-REG-ID to instantiate s2/standalone/unique_code-tpl.py
         run: |
+          chmod +x tools/process-templates.sh
           sed -e "s/ZZ-REG-ID=.*/ZZ-REG-ID=${{ github.repository_owner }}/" cluster/tpl-vars-blank.txt > cluster/tpl-vars.txt
           make -f k8s-tpl.mak templates
       - name: Run CI test
