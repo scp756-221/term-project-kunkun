@@ -18,7 +18,7 @@ import boto3
 
 
 # Function definitions
-def create_tables(url, region, access_key_id, secret_access_key, music, user):
+def create_tables(url, region, access_key_id, secret_access_key, music, user, comment):
     """ Create the music and user tables in DynamoDB.
 
     Parameters
@@ -43,6 +43,8 @@ def create_tables(url, region, access_key_id, secret_access_key, music, user):
         Name of the music table.
     user: string
         Name of the user table.
+    comment: string
+        Name of the comment table.
     """
     dynamodb = boto3.resource(
         'dynamodb',
@@ -72,9 +74,18 @@ def create_tables(url, region, access_key_id, secret_access_key, music, user):
         ProvisionedThroughput={
             "ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
     )
+    ct = dynamodb.create_table(
+        TableName=comment,
+        AttributeDefinitions=[{
+            "AttributeName": "comment_id", "AttributeType": "S"}],
+        KeySchema=[{"AttributeName": "comment_id", "KeyType": "HASH"}],
+        ProvisionedThroughput={
+            "ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+    )
     """
     The order in which we wait for the tables is irrelevant.  We can only
     proceed after both exist.
     """
     mt.wait_until_exists()
     ut.wait_until_exists()
+    ct.wait_until_exists()

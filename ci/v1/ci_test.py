@@ -54,6 +54,15 @@ def parse_args():
         help="Port number of music service."
         )
     argp.add_argument(
+        'comment_address',
+        help="DNS name or IP address of comment service."
+    )
+    argp.add_argument(
+        'comment_port',
+        type=int,
+        help="Port number of comment service."
+    )
+    argp.add_argument(
         'table_suffix',
         help="Suffix to add to table names (not including leading "
              "'-').  If suffix is 'scp756-2022', the music table "
@@ -64,6 +73,8 @@ def parse_args():
         args.user_address, args.user_port)
     args.music_url = "http://{}:{}/api/v1/music/".format(
         args.music_address, args.music_port)
+    args.comment_url = "http://{}:{}/api/v1/comment/".format(
+        args.comment_address, args.comment_port)
     return args
 
 
@@ -118,7 +129,8 @@ def setup(args):
         args.access_key_id,
         args.secret_access_key,
         'Music-' + args.table_suffix,
-        'User-' + args.table_suffix
+        'User-' + args.table_suffix,
+        'Comment-' + args.table_suffix
     )
 
 

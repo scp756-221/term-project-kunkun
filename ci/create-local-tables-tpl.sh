@@ -20,4 +20,11 @@ aws dynamodb create-table \
   --attribute-definitions '[{ "AttributeName": "user_id", "AttributeType": "S" }]' \
   --key-schema '[{ "AttributeName": "user_id", "KeyType": "HASH" }]' \
   --provisioned-throughput '{"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}'
+aws dynamodb create-table \
+  --endpoint-url http://0.0.0.0:8000 \
+  --region us-west-2 \
+  --table-name User-ZZ-REG-ID \
+  --attribute-definitions '[{ "AttributeName": "comment_id", "AttributeType": "S" }]' \
+  --key-schema '[{ "AttributeName": "comment_id", "KeyType": "HASH" }]' \
+  --provisioned-throughput '{"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}'
 
