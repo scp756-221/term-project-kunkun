@@ -37,6 +37,7 @@ When running CI tests locally, whether by `runci.sh` or `runch-local.sh` (or any
 * `ci_db:latest`
 * `ci_s1:latest`
 * `ci_s2:latest`
+* `ci_s3:latest`
 * `ci_test:latest`
 
 You will probably want to remove these (via `docker image rm`) once you are done.
@@ -58,5 +59,5 @@ to regenerate the `compose.yaml` file that will actually define the test.
 
 The following scripts are simple utilities that may prove useful:
 
-* `create-local-tables.sh`: Create the two DynamoDB tables in a local instance. This does not have to be done for a regular test, in which the Python code creates the tables.  But when running manual tests, you may use this script to create the tables.
+* `create-local-tables.sh`: Create the three DynamoDB tables in a local instance. This does not have to be done for a regular test, in which the Python code creates the tables.  But when running manual tests, you may use this script to create the tables.
 * `quick-test.sh`: A quick test of a running system, this creates a single song on the music table.  Because the music system accepts multiple "creates" of the same song (giving each instance a different UUID), you can call this multiple times without error.

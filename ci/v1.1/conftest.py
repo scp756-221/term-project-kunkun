@@ -14,6 +14,7 @@ succeed or making a successful test fail.
 
 # Standard libraries
 import os
+import warnings
 
 # Installed packages
 import pytest
@@ -49,6 +50,15 @@ def pytest_addoption(parser):
         help="Port number of music service."
         )
     parser.addoption(
+        '--comment_address',
+        help="DNS name or IP address of comment service."
+    )
+    parser.addoption(
+        '--comment_port',
+        type=int,
+        help="Port number of comment service."
+    )
+    parser.addoption(
         '--table_suffix',
         help="Suffix to add to table names (not including leading "
              "'-').  If suffix is 'scp756-2022', the music table "
@@ -77,6 +87,16 @@ def music_port(request):
 
 
 @pytest.fixture
+def comment_address(request):
+    return request.config.getoption('--comment_address')
+
+
+@pytest.fixture
+def comment_port(request):
+    return request.config.getoption('--comment_port')
+
+
+@pytest.fixture
 def table_suffix(request):
     return request.config.getoption('--table_suffix')
 
@@ -91,6 +111,12 @@ def user_url(request, user_address, user_port):
 def music_url(request, music_address, music_port):
     return "http://{}:{}/api/v1/music/".format(
         music_address, music_port)
+
+
+@pytest.fixture
+def comment_url(request, comment_address, comment_port):
+    return "http://{}:{}/api/v1/comment/".format(
+        comment_address, comment_port)
 
 
 @pytest.fixture
@@ -154,13 +180,15 @@ def setup(args):
         The arguments specifying the tables. Uses dynamodb_url,
         dynamodb_region, access_key_id, secret_access_key, table_suffix.
     """
+    warnings.simplefilter('ignore', ResourceWarning)
     create_tables.create_tables(
         args.dynamodb_url,
         args.dynamodb_region,
         args.access_key_id,
         args.secret_access_key,
         'Music-' + args.table_suffix,
-        'User-' + args.table_suffix
+        'User-' + args.table_suffix,
+        'Comment-' + args.table_suffix
     )
 
 
