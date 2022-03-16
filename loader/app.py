@@ -67,6 +67,24 @@ def create_song(artist, title, uuid):
     return (response.json())
 
 
+def create_comment(text, music_id, song_title):
+    """
+    Create a song.
+    If a record already exists with the same artist and title,
+    the old UUID is replaced with this one.
+    """
+    url = db['name'] + '/load'
+    response = requests.post(
+        url,
+        auth=build_auth(),
+        json={"objtype": "comment",
+              "text": text,
+              "music_id": music_id,
+              "song_title": song_title,
+              "uuid": uuid})
+    return (response.json())
+
+
 def check_resp(resp, key):
     if 'http_status_code' in resp:
         return None
@@ -107,3 +125,15 @@ if __name__ == '__main__':
                 print('Error creating song {} {}, {}'.format(artist,
                                                              title,
                                                              uuid))
+
+    with open('{}/comment/comment.csv'.format(resource_dir), 'r') as inp:
+        rdr = csv.reader(inp)
+        next(rdr)  # Skip header
+        for text, music_id, song_title, uuid in rdr:
+            resp = create_comment(text.strip(),
+                               music_id.strip(),
+                               song_title.strip(),
+                               uuid.strip())
+            resp = check_resp(resp, 'comment_id')
+            if resp is None or resp != uuid:
+                print('Error creating user {} {} ({}), {}'.format(text, music_id, song_title, uuid))
