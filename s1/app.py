@@ -168,6 +168,7 @@ def logoff():
 # All database calls will have this prefix.  Prometheus metric
 # calls will not---they will have route '/metrics'.  This is
 # the conventional organization.
+# change for test
 app.register_blueprint(bp, url_prefix='/api/v1/user/')
 
 if __name__ == '__main__':
