@@ -44,6 +44,28 @@
             "WriteCapacityUnits": "5"
           }
         }
+      },
+      "tableComment": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+          "TableName": "User-ZZ-REG-ID",
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "comment_id",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "comment_id",
+              "KeyType": "HASH"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": "5",
+            "WriteCapacityUnits": "5"
+          }
+        }
       }
     },
     "Description": "DynamoDB tables for ZZ-AWS-ACCESS-KEY-ID"

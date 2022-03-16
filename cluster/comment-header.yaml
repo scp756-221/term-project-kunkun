@@ -1,0 +1,7 @@
+# Header for ConfigMap built from comment.csv
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: comment
+data:
+  users.csv: |

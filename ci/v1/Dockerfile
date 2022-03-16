@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ci_test.py create_tables.py music.py ./
 
-CMD ["python", "ci_test.py", "s1", "30000", "s2", "30001", "scp756-221"]
+CMD ["python", "ci_test.py", "s1", "30000", "s2", "30001", , "s3", "30003", "scp756-221"]
