@@ -39,14 +39,6 @@ db = {
 }
 
 
-@bp.route('/', methods=['GET'])
-@metrics.do_not_track()
-def hello_world():
-    return ("If you are reading this in a browser, your service is "
-            "operational. Switch to curl/Postman/etc to interact using the "
-            "other HTTP verbs.")
-
-
 @bp.route('/health')
 @metrics.do_not_track()
 def health():
