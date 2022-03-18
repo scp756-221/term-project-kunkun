@@ -1,5 +1,5 @@
 """
-Simple command-line interface to music service
+Simple command-line interface to service
 
 """
 
