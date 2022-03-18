@@ -1,5 +1,5 @@
 """
-Simple command-line interface to music service
+Simple command-line interface to service
 
 """
 
@@ -131,6 +131,27 @@ Enter 'help' for command list.
                     i['lname'],
                     i["email"]))
 
+         # Connect comment service
+        elif self.service == "comment":
+            r = requests.get(
+                url + arg.strip(),
+                headers={'Authorization': DEFAULT_AUTH}
+            )
+            if r.status_code != 200:
+                print("Non-successful status code: {}, {}"
+                      .format(r.status_code, r.json()["error"]))
+            items = r.json()
+            if 'Count' not in items:
+                print("0 items returned")
+                return
+            print("{} items returned".format(items['Count']))
+            for i in items['Items']:
+                print("{}  {} {} {}".format(
+                    i['comment_id'],
+                    i['text'],
+                    i['music_id'],
+                    i["song_title"]))
+
     def do_create(self, arg):
         """
         Add a song to the database.
@@ -185,6 +206,23 @@ Enter 'help' for command list.
             )
             print(r.json())
 
+        elif self.service == "comment":
+            if len(args) != 3:
+                print("Not enough or too many args provided {}".format(len(args)))
+                return
+
+            payload = {
+                'test': args[0],
+                'music_id': args[1],
+                'song_title': args[2]
+            }
+            r = requests.post(
+                url,
+                json=payload,
+                headers={'Authorization': DEFAULT_AUTH}
+            )
+            print(r.json())
+
     def do_delete(self, arg):
         """
         Delete a song.
@@ -211,6 +249,15 @@ Enter 'help' for command list.
                       .format(r.status_code, r.json()["error"]))
 
         elif self.service == "user":
+            r = requests.delete(
+                url + arg.strip(),
+                headers={'Authorization': DEFAULT_AUTH}
+            )
+            if r.status_code != 200:
+                print("Non-successful status code: {}, {}"
+                      .format(r.status_code, r.json()["error"]))
+
+        elif self.service == "comment":
             r = requests.delete(
                 url + arg.strip(),
                 headers={'Authorization': DEFAULT_AUTH}
