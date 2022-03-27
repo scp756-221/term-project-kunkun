@@ -613,6 +613,12 @@ data:
               "interval": "",
               "legendFormat": "cmpt756s2",
               "refId": "C"
+            },
+            {
+              "expr": "sum(rate(flask_http_request_duration_seconds_sum{status=\"200\",service=\"cmpt756s3\"}[1m]))\n/\nsum(rate(flask_http_request_duration_seconds_count{status=\"200\",service=\"cmpt756s3\"}[1m]))",
+              "interval": "",
+              "legendFormat": "cmpt756s3",
+              "refId": "D"
             }
           ],
           "thresholds": [],
@@ -731,6 +737,12 @@ data:
               "interval": "",
               "legendFormat": "cmpt756s2",
               "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.5, sum by (le) (rate(flask_http_request_duration_seconds_bucket{service=\"cmpt756s3\",status=\"200\"}[1m])))",
+              "interval": "",
+              "legendFormat": "cmpt756s3",
+              "refId": "D"
             }
           ],
           "thresholds": [],
@@ -929,7 +941,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "avg by (service) (increase(flask_http_request_duration_seconds_bucket{status=\"200\",le=\"0.1\"}[5m]) \n/ ignoring (le) increase(flask_http_request_duration_seconds_count{status=\"200\"}[5m]))",
+              "expr": "avg by (service) (increase(flask_http_request_duration_seconds_bucket{status=\"200\",le=\"0.1\"}[5m]) \n/ ignoring (le) increase(flask_http_request_duration_seconds_count{status=\"200\"}[5m])>0)",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -1053,6 +1065,12 @@ data:
               "interval": "",
               "legendFormat": "cmpt756s2",
               "refId": "C"
+            },
+            {
+             "expr": "histogram_quantile(0.9, sum by (le) (rate(flask_http_request_duration_seconds_bucket{service=\"cmpt756s3\",status=\"200\"}[1m])))",
+             "interval": "",
+             "legendFormat": "cmpt756s3",
+             "refId": "D"
             }
           ],
           "thresholds": [],
@@ -1153,7 +1171,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "c756 transactions",
+      "title": "Kunkun transactions",
       "uid": "u_DVKhQiz",
       "version": 9
     }
