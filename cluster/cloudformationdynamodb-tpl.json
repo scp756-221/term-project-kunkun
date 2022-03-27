@@ -48,7 +48,7 @@
       "tableComment": {
         "Type": "AWS::DynamoDB::Table",
         "Properties": {
-          "TableName": "User-ZZ-REG-ID",
+          "TableName": "Comment-ZZ-REG-ID",
           "AttributeDefinitions": [
             {
               "AttributeName": "comment_id",
