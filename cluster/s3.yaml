@@ -48,7 +48,7 @@ spec:
       version: v1
   template:
     metadata:
-      name: service1-pod
+      name: service3-pod
       labels:
         app: cmpt756s3
         version: v1

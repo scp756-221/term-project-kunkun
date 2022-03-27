@@ -35,8 +35,8 @@ spec:
           mountPath: "/data/users"
           readOnly: true
         - name: comment
-            mountPath: "/data/comment"
-            readOnly: true
+          mountPath: "/data/comment"
+          readOnly: true
       volumes:
       - name: music
         configMap:
@@ -45,7 +45,7 @@ spec:
         configMap:
           name: users
       - name: comment
-          configMap:
-            name: comment
+        configMap:
+          name: comment
       restartPolicy: Never
   backoffLimit: 0
