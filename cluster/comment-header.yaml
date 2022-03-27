@@ -4,4 +4,4 @@ kind: ConfigMap
 metadata:
   name: comment
 data:
-  users.csv: |
+  comment.csv: |
