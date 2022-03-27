@@ -212,7 +212,7 @@ Enter 'help' for command list.
                 return
 
             payload = {
-                'test': args[0],
+                'text': args[0],
                 'music_id': args[1],
                 'song_title': args[2]
             }
