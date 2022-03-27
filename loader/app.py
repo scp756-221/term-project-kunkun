@@ -67,7 +67,7 @@ def create_song(artist, title, uuid):
     return (response.json())
 
 
-def create_comment(text, music_id, song_title):
+def create_comment(text, song_title, music_id, uuid):
     """
     Create a song.
     If a record already exists with the same artist and title,
