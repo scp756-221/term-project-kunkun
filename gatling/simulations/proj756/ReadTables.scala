@@ -54,6 +54,19 @@ object RUser {
 
 }
 
+object RComment {
+
+  val feeder = csv("comment.csv").eager.circular
+
+  val rcomment = forever("i") {
+    feed(feeder)
+    .exec(http("RComment ${i}")
+      .get("/api/v1/comment/${UUID}"))
+    .pause(1)
+  }
+
+}
+
 /*
   After one S1 read, pause a random time between 1 and 60 s
 */
@@ -79,6 +92,21 @@ object RMusicVarying {
     feed(feeder)
     .exec(http("RMusicVarying ${i}")
       .get("/api/v1/music/${UUID}"))
+    .pause(1, 60)
+  }
+}
+
+/*
+  After one S3 read, pause a random time between 1 and 60 s
+*/
+
+object RCommentVarying {
+  val feeder = csv("comment.csv").eager.circular
+
+  val rcomment = forever("i") {
+    feed(feeder)
+    .exec(http("RCommentVarying ${i}")
+      .get("/api/v1/comment/${UUID}"))
     .pause(1, 60)
   }
 }
@@ -134,6 +162,14 @@ class ReadMusicSim extends ReadTablesSim {
   ).protocols(httpProtocol)
 }
 
+class ReadCommentSim extends ReadTablesSim {
+  val scnReadComment = scenario("ReadComment")
+    .exec(RComment.rcomment)
+
+  setUp(
+    scnReadComment.inject(atOnceUsers(Utility.envVarToInt("USERS", 1)))
+  ).protocols(httpProtocol)
+}
 /*
   Read both services concurrently at varying rates.
   Ramp up new users one / 10 s until requested USERS
@@ -146,12 +182,16 @@ class ReadBothVaryingSim extends ReadTablesSim {
   val scnReadUV = scenario("ReadUserVarying")
     .exec(RUserVarying.ruser)
 
+  val scnReadCV = scenario("ReadCommentVarying")
+    .exec(RCommentVarying.rcomment)
+
   val users = Utility.envVarToInt("USERS", 10)
 
   setUp(
     // Add one user per 10 s up to specified value
     scnReadMV.inject(rampConcurrentUsers(1).to(users).during(10*users)),
-    scnReadUV.inject(rampConcurrentUsers(1).to(users).during(10*users))
+    scnReadUV.inject(rampConcurrentUsers(1).to(users).during(10*users)),
+    scnReadCV.inject(rampConcurrentUsers(1).to(users).during(10*users)),
   ).protocols(httpProtocol)
 }
 
