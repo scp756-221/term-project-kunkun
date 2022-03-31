@@ -64,7 +64,7 @@ templates:
 #
 #  Nov 2021: Kiali is causing problems so do not deploy
 #provision: istio prom kiali deploy
-provision: istio prom deploy
+provision: istio prom deploy kiali kiali-url grafana-url
 
 # --- deploy: Deploy and monitor the three microservices
 # Use `provision` to deploy the entire stack (including Istio, Prometheus, ...).

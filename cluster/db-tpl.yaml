@@ -61,7 +61,7 @@ metadata:
     app: cmpt756db
     version: v1
 spec:
-  replicas: 1
+  replicas: 160
   selector:
     matchLabels:
       app: cmpt756db
@@ -94,15 +94,17 @@ spec:
           httpGet:
             path: /api/v1/datastore/health
             port: 30002
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
           failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /api/v1/datastore/readiness
             port: 30002
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 5
