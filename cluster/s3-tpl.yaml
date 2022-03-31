@@ -41,7 +41,7 @@ metadata:
     app: cmpt756s3
     version: v1
 spec:
-  replicas: 1
+  replicas: 53
   selector:
     matchLabels:
       app: cmpt756s3
@@ -64,15 +64,17 @@ spec:
           httpGet:
             path: /api/v1/comment/health
             port: 30003
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
           failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /api/v1/comment/readiness
             port: 30003
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 5
