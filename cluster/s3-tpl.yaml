@@ -60,6 +60,9 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 30003
+        resources:
+          requests:
+            cpu: 200m
         livenessProbe:
           httpGet:
             path: /api/v1/comment/health

@@ -90,6 +90,9 @@ spec:
             name: awscred
         ports:
         - containerPort: 30002
+        resources:
+          requests:
+            cpu: 200m
         livenessProbe:
           httpGet:
             path: /api/v1/datastore/health
