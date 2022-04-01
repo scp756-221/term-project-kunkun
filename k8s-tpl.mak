@@ -362,3 +362,40 @@ image: showcontext registry-login
 	head -n 1 __header
 	cat __content
 	rm __content __header
+
+provision-delay: cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs-delay.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-delay.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756db
+
+provision-abort: cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs-abort.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-abort.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756db
+
+s2-1: s2/v1/Dockerfile s2/v1/app.py s2/v1/requirements.txt
+	make -f k8s.mak --no-print-directory registry-login
+	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s2:v1 s2/v1
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:v1
+
+s2-2: s2/v2/Dockerfile s2/v2/app.py s2/v2/requirements.txt
+	make -f k8s.mak --no-print-directory registry-login
+	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s2:v2 s2/v2
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:v2
+
+rollout-s2-1: s2-1 cluster/s2-dpl-v1.yaml
+	$(KC) delete deployments cmpt756s2 || true
+	$(KC) -n $(APP_NS) apply -f cluster/s2-dpl-v1.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-v1
+
+rollout-s2-2: s2-2 cluster/s2-dpl-v2.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-dpl-v2.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-v2
+
+provision-canary: rollout-s2-1 rollout-s2-2 cluster/s2-sm.yaml cluster/s2-vs-canary.yaml cluster/s2-svc.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-svc.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-canary.yaml
+
+reroute-s2-1: rollout-s2-1 cluster/s2-sm.yaml cluster/s2-vs-canary-reroute.yaml cluster/s2-svc.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-canary-reroute.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-svc.yaml
