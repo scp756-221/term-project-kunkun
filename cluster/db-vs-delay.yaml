@@ -18,6 +18,6 @@ spec:
           number: 30002
     fault:
        delay:
-        fixedDelay: 500ms
+        fixedDelay: 5s
         percentage:
-          value: 10
+          value: 50

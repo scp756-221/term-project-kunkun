@@ -16,7 +16,7 @@
 
 # These will be filled in by template processor
 CREG=ghcr.io
-REGID=jingshan-feng
+REGID=danleiqiang
 AWS_REGION=us-west-2
 
 # Keep all the logs out of main directory
@@ -64,7 +64,7 @@ templates:
 #
 #  Nov 2021: Kiali is causing problems so do not deploy
 #provision: istio prom kiali deploy
-provision: istio prom deploy
+provision: istio prom deploy kiali kiali-url grafana-url
 
 # --- deploy: Deploy and monitor the three microservices
 # Use `provision` to deploy the entire stack (including Istio, Prometheus, ...).
@@ -200,14 +200,14 @@ dynamodb-init: $(LOG_DIR)/dynamodb-init.log
 $(LOG_DIR)/dynamodb-init.log: cluster/cloudformationdynamodb.json
 	@# "|| true" suffix because command fails when stack already exists
 	@# (even with --on-failure DO_NOTHING, a nonzero error code is returned)
-	$(AWS) cloudformation create-stack --stack-name db-jingshan-feng --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-init.log
+	$(AWS) cloudformation create-stack --stack-name db-danleiqiang --template-body file://$< || true | tee $(LOG_DIR)/dynamodb-init.log
 	# Must give DynamoDB time to create the tables before running the loader
 	sleep 20
 
 # --- dynamodb-stop: Stop the AWS DynamoDB service
 #
 dynamodb-clean:
-	$(AWS) cloudformation delete-stack --stack-name db-jingshan-feng || true | tee $(LOG_DIR)/dynamodb-clean.log
+	$(AWS) cloudformation delete-stack --stack-name db-danleiqiang || true | tee $(LOG_DIR)/dynamodb-clean.log
 	@# Rename DynamoDB log so dynamodb-init will force a restart but retain the log
 	/bin/mv -f $(LOG_DIR)/dynamodb-init.log $(LOG_DIR)/dynamodb-init-old.log || true
 
@@ -362,3 +362,40 @@ image: showcontext registry-login
 	head -n 1 __header
 	cat __content
 	rm __content __header
+
+provision-delay: cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs-delay.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-delay.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756db
+
+provision-fault: cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs-fault.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-fault.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756db
+
+s2-1: s2/v1/Dockerfile s2/v1/app.py s2/v1/requirements.txt
+	make -f k8s.mak --no-print-directory registry-login
+	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s2:v1 s2/v1
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:v1
+
+s2-2: s2/v2/Dockerfile s2/v2/app.py s2/v2/requirements.txt
+	make -f k8s.mak --no-print-directory registry-login
+	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s2:v2 s2/v2
+	$(DK) push $(CREG)/$(REGID)/cmpt756s2:v2
+
+rollout-s2-1: s2-1 cluster/s2-dpl-v1.yaml
+	$(KC) delete deployments cmpt756s2 || true
+	$(KC) -n $(APP_NS) apply -f cluster/s2-dpl-v1.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-v1
+
+rollout-s2-2: s2-2 cluster/s2-dpl-v2.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-dpl-v2.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-v2
+
+provision-canary: rollout-s2-1 rollout-s2-2 cluster/s2-sm.yaml cluster/s2-vs-canary.yaml cluster/s2-svc.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-svc.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-canary.yaml
+
+reroute-s2-1: rollout-s2-1 cluster/s2-sm.yaml cluster/s2-vs-canary-reroute.yaml cluster/s2-svc.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-canary-reroute.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-svc.yaml
