@@ -32,6 +32,7 @@ IC=istioctl
 # Override these by environment variables and `make -e`
 APP_VER_TAG=v1
 S2_VER=v1
+S3_VER=v1
 LOADER_VER=v1
 
 # Kubernetes parameters that most of the time will be unchanged
@@ -85,8 +86,9 @@ rollout-s2: $(LOG_DIR)/s2-$(S2_VER).repo.log  cluster/s2-dpl-$(S2_VER).yaml
 	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-$(S2_VER) | tee -a $(LOG_DIR)/rollout-s2.log
 
 # --- rollout-s3: Rollout a new deployment of S3
-rollout-s3: s3
-	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s3
+rollout-s3: $(LOG_DIR)/s3-$(S3_VER).repo.log  cluster/s3-dpl-$(S3_VER).yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s3-dpl-$(S3_VER).yaml | tee $(LOG_DIR)/rollout-s3.log
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s3-$(S3_VER) | tee -a $(LOG_DIR)/rollout-s3.log
 
 # --- rollout-db: Rollout a new deployment of DB
 rollout-db: db
@@ -301,8 +303,8 @@ s2: rollout-s2 cluster/s2-svc.yaml cluster/s2-sm.yaml cluster/s2-vs.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s2-vs.yaml | tee -a $(LOG_DIR)/s2.log
 
 # Update S3 and associated monitoring, rebuilding if necessary
-s3: $(LOG_DIR)/s3.repo.log cluster/s3.yaml cluster/s3-sm.yaml cluster/s3-vs.yaml
-	$(KC) -n $(APP_NS) apply -f cluster/s3.yaml | tee $(LOG_DIR)/s3.log
+s3: rollout-s3 cluster/s3-svc.yaml cluster/s3-sm.yaml cluster/s3-vs.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s3-svc.yaml | tee $(LOG_DIR)/s3.log
 	$(KC) -n $(APP_NS) apply -f cluster/s3-sm.yaml | tee -a $(LOG_DIR)/s3.log
 	$(KC) -n $(APP_NS) apply -f cluster/s3-vs.yaml | tee -a $(LOG_DIR)/s3.log
 
@@ -315,7 +317,7 @@ db: $(LOG_DIR)/db.repo.log cluster/awscred.yaml cluster/dynamodb-service-entry.y
 	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml | tee -a $(LOG_DIR)/db.log
 
 # Build & push the images up to the CR
-cri: $(LOG_DIR)/s1.repo.log $(LOG_DIR)/s2-$(S2_VER).repo.log $(LOG_DIR)/s3.repo.log $(LOG_DIR)/db.repo.log
+cri: $(LOG_DIR)/s1.repo.log $(LOG_DIR)/s2-$(S2_VER).repo.log $(LOG_DIR)/s3-$(S3_VER).repo.log $(LOG_DIR)/db.repo.log
 
 # Build the s1 service
 $(LOG_DIR)/s1.repo.log: s1/Dockerfile s1/app.py s1/requirements.txt
@@ -330,10 +332,10 @@ $(LOG_DIR)/s2-$(S2_VER).repo.log: s2/$(S2_VER)/Dockerfile s2/$(S2_VER)/app.py s2
 	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(S2_VER) | tee $(LOG_DIR)/s2-$(S2_VER).repo.log
 
 # Build the s3 service
-$(LOG_DIR)/s3.repo.log: s3/Dockerfile s3/app.py s3/requirements.txt
+$(LOG_DIR)/s3-$(S3_VER).repo.log: s3/$(S3_VER)/Dockerfile s3/$(S3_VER)/app.py s3/$(S3_VER)/requirements.txt
 	make -f k8s.mak --no-print-directory registry-login
-	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s3:$(APP_VER_TAG) s3 | tee $(LOG_DIR)/s3.img.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s3:$(APP_VER_TAG) | tee $(LOG_DIR)/s3.repo.log
+	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s3:$(S3_VER) s3/$(S3_VER) | tee $(LOG_DIR)/s3-$(S3_VER).img.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s3:$(S3_VER) | tee $(LOG_DIR)/s3-$(S3_VER).repo.log
 
 # Build the db service
 $(LOG_DIR)/db.repo.log: db/Dockerfile db/app.py db/requirements.txt
@@ -352,7 +354,7 @@ $(LOG_DIR)/loader.repo.log: loader/app.py loader/requirements.txt loader/Dockerf
 cr: registry-login
 	$(DK) push $(CREG)/$(REGID)/cmpt756s1:$(APP_VER_TAG) | tee $(LOG_DIR)/s1.repo.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756s2:$(S2_VER) | tee $(LOG_DIR)/s2.repo.log
-	$(DK) push $(CREG)/$(REGID)/cmpt756s3:$(APP_VER_TAG) | tee $(LOG_DIR)/s3.repo.log
+	$(DK) push $(CREG)/$(REGID)/cmpt756s3:$(S3_VER) | tee $(LOG_DIR)/s3.repo.log
 	$(DK) push $(CREG)/$(REGID)/cmpt756db:$(APP_VER_TAG) | tee $(LOG_DIR)/db.repo.log
 
 # ---------------------------------------------------------------------------------------
@@ -381,13 +383,20 @@ s2-2: s2/v2/Dockerfile s2/v2/app.py s2/v2/requirements.txt
 	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s2:v2 s2/v2
 	$(DK) push $(CREG)/$(REGID)/cmpt756s2:v2
 
+delete-s2-1:
+	$(KC) delete -n $(APP_NS) deploy cmpt756s2-v1
+
+delete-s2-2:
+	$(KC) delete -n $(APP_NS) deploy cmpt756s2-v2
+
 rollout-s2-1: s2-1 cluster/s2-dpl-v1.yaml
-	$(KC) delete deployments cmpt756s2 || true
 	$(KC) -n $(APP_NS) apply -f cluster/s2-dpl-v1.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs.yaml
 	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-v1
 
-rollout-s2-2: s2-2 cluster/s2-dpl-v2.yaml
+rollout-s2-2: s2-2 cluster/s2-dpl-v2.yaml cluster/s2-vs-v2.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s2-dpl-v2.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-v2.yaml
 	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s2-v2
 
 provision-canary: rollout-s2-1 rollout-s2-2 cluster/s2-sm.yaml cluster/s2-vs-canary.yaml cluster/s2-svc.yaml
@@ -399,3 +408,29 @@ reroute-s2-1: rollout-s2-1 cluster/s2-sm.yaml cluster/s2-vs-canary-reroute.yaml 
 	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-canary-reroute.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s2-svc.yaml
+
+s3-1: s3/v1/Dockerfile s3/v1/app.py s3/v1/requirements.txt
+	make -f k8s.mak --no-print-directory registry-login
+	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s3:v1 s3/v1
+	$(DK) push $(CREG)/$(REGID)/cmpt756s3:v1
+
+s3-2: s3/v2/Dockerfile s3/v2/app.py s3/v2/requirements.txt
+	make -f k8s.mak --no-print-directory registry-login
+	$(DK) build $(ARCH) -t $(CREG)/$(REGID)/cmpt756s3:v2 s3/v2
+	$(DK) push $(CREG)/$(REGID)/cmpt756s3:v2
+
+delete-s3-1:
+	$(KC) delete -n $(APP_NS) deploy cmpt756s3-v1
+
+delete-s3-2:
+	$(KC) delete -n $(APP_NS) deploy cmpt756s3-v2
+
+rollout-s3-1: s3-1 cluster/s3-dpl-v1.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s3-dpl-v1.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s3-v1
+
+rollout-s3-2: s3-2 cluster/s3-dpl-v2.yaml cluster/s3-vs-v2.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s3-dpl-v2.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-v2.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s3-v2

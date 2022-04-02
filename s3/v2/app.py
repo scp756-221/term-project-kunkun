@@ -1,11 +1,10 @@
 """
 SFU CMPT 756
-Sample application---music service.
+Application---comment service.
 """
 
 # Standard library modules
 import logging
-import random
 import sys
 
 # Installed packages
@@ -17,29 +16,28 @@ from flask import Response
 from prometheus_flask_exporter import PrometheusMetrics
 
 import requests
+import random
 
 import simplejson as json
 
 # The application
-
-# Integer value 0 <= v < 100, denoting proportion of
-# calls to `get_song` to return 500 from
 PERCENT_ERROR = -1
-
 app = Flask(__name__)
 
 metrics = PrometheusMetrics(app)
-metrics.info('app_info', 'Music process')
+metrics.info('app_info', 'Comment process')
+
+bp = Blueprint('app', __name__)
 
 db = {
     "name": "http://cmpt756db:30002/api/v1/datastore",
     "endpoint": [
         "read",
         "write",
-        "delete"
+        "delete",
+        "update"
     ]
 }
-bp = Blueprint('app', __name__)
 
 
 @bp.route('/health')
@@ -62,58 +60,62 @@ def list_all():
         return Response(json.dumps({"error": "missing auth"}),
                         status=401,
                         mimetype='application/json')
-    # list all songs here
+    # list all comments here
     return {}
 
 
-@bp.route('/<music_id>', methods=['GET'])
-def get_song(music_id):
+@bp.route('/read_comment_text/<comment_id>', methods=['GET'])
+def read_comment_text(comment_id):
     headers = request.headers
     # check header here
     if 'Authorization' not in headers:
         return Response(json.dumps({"error": "missing auth"}),
                         status=401,
                         mimetype='application/json')
-    payload = {"objtype": "music", "objkey": music_id}
-
-    # This version will return 500 for a fraction of its calls
-    if random.randrange(100) < PERCENT_ERROR:
-        return Response(json.dumps({"error": "get_song failed"}),
-                        status=500,
-                        mimetype='application/json')
-
+    payload = {"objtype": "comment", "objkey": comment_id}
     url = db['name'] + '/' + db['endpoint'][0]
     response = requests.get(
         url,
         params=payload,
         headers={'Authorization': headers['Authorization']})
-    return (response.json())
+    if response.status_code != 200:
+        response = {
+            "Count": 0,
+            "Items": []
+        }
+        return app.make_response((response, 404))
+    item = response.json()['Items'][0]
+    oa = (item['text'] if 'text' in item
+          else None)
+    return {'text': oa}
 
 
 @bp.route('/', methods=['POST'])
-def create_song():
-    headers = request.headers
-    # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}),
-                        status=401,
-                        mimetype='application/json')
+def create_comment():
+    """
+    Create a comment.
+    If a record already exists with the same text, music_id, and song_title,
+    the old UUID is replaced with a new one.
+    """
     try:
         content = request.get_json()
-        Artist = content['Artist']
-        SongTitle = content['SongTitle']
+        text = content['text']
+        music_id = content['music_id']
+        song_title = content['song_title']
     except Exception:
         return json.dumps({"message": "error reading arguments"})
     url = db['name'] + '/' + db['endpoint'][1]
     response = requests.post(
         url,
-        json={"objtype": "music", "Artist": Artist, "SongTitle": SongTitle},
-        headers={'Authorization': headers['Authorization']})
+        json={"objtype": "comment",
+              "text": text,
+              "music_id": music_id,
+              "song_title": song_title})
     return (response.json())
 
 
-@bp.route('/<music_id>', methods=['DELETE'])
-def delete_song(music_id):
+@bp.route('/<comment_id>', methods=['DELETE'])
+def delete_comment(comment_id):
     headers = request.headers
     # check header here
     if 'Authorization' not in headers:
@@ -121,21 +123,43 @@ def delete_song(music_id):
                         status=401,
                         mimetype='application/json')
     url = db['name'] + '/' + db['endpoint'][2]
-    response = requests.delete(
-        url,
-        params={"objtype": "music", "objkey": music_id},
-        headers={'Authorization': headers['Authorization']})
+
+    response = requests.delete(url,
+                               params={"objtype": "comment",
+                                       "objkey": comment_id})
+    return (response.json())
+
+
+@bp.route('/<comment_id>', methods=['GET'])
+def get_comment(comment_id):
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(
+            json.dumps({"error": "missing auth"}),
+            status=401,
+            mimetype='application/json')
+    payload = {"objtype": "comment", "objkey": comment_id}
+
+    # This version will return 500 for a fraction of its calls
+    if random.randrange(100) < PERCENT_ERROR:
+        return Response(json.dumps({"error": "get_comment failed"}),
+                        status=500,
+                        mimetype='application/json')
+
+    url = db['name'] + '/' + db['endpoint'][0]
+    response = requests.get(url, params=payload)
     return (response.json())
 
 
 # All database calls will have this prefix.  Prometheus metric
 # calls will not---they will have route '/metrics'.  This is
 # the conventional organization.
-app.register_blueprint(bp, url_prefix='/api/v1/music/')
+app.register_blueprint(bp, url_prefix='/api/v1/comment/')
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        logging.error("missing port arg 1")
+        logging.error("Usage: app.py <service-port>")
         sys.exit(-1)
 
     p = int(sys.argv[1])
