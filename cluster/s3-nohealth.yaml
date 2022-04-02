@@ -47,7 +47,7 @@ metadata:
     app: cmpt756s3
     version: v1
 spec:
-  replicas: 1
+  replicas: 25
   selector:
     matchLabels:
       app: cmpt756s3
@@ -62,7 +62,7 @@ spec:
       serviceAccountName: svc-s3
       containers:
       - name: service3
-        image: 'ghcr.io/jingshan-feng/cmpt756s3:latest'
+        image: 'ghcr.io/danleiqiang/cmpt756s3:latest'
         imagePullPolicy: Always
         ports:
         - containerPort: 30003

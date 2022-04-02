@@ -15,40 +15,40 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cmpt756s2-v1
+  name: cmpt756s3-v1
   labels:
-    app: cmpt756s2
+    app: cmpt756s3
     version: v1
 spec:
   replicas: 25
   selector:
     matchLabels:
-      app: cmpt756s2
+      app: cmpt756s3
       version: v1
   template:
     metadata:
-      name: service2-pod
+      name: service3-pod
       labels:
-        app: cmpt756s2
+        app: cmpt756s3
         version: v1
     spec:
-      serviceAccountName: svc-s2
+      serviceAccountName: svc-s3
       containers:
-      - name: cmpt756s2
-        image: 'ZZ-CR-ID/ZZ-REG-ID/cmpt756s2:v1'
+      - name: cmpt756s3
+        image: 'ghcr.io/danleiqiang/cmpt756s3:v1'
         imagePullPolicy: Always
         env:
           - name: EXER
             value: v1
         ports:
-        - containerPort: 30001
+        - containerPort: 30003
         resources:
           requests:
             cpu: 200m
         livenessProbe:
           httpGet:
-            path: /api/v1/music/health
-            port: 30001
+            path: /api/v1/comment/health
+            port: 30003
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 5
@@ -56,8 +56,8 @@ spec:
           failureThreshold: 5
         readinessProbe:
           httpGet:
-            path: /api/v1/music/readiness
-            port: 30001
+            path: /api/v1/comment/readiness
+            port: 30003
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 5

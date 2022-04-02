@@ -5,9 +5,9 @@ metadata:
 spec:
   host: cmpt756s3
   subsets:
-  - name: v1
+  - name: v2
     labels:
-      version: v1
+      version: v2
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -33,4 +33,4 @@ spec:
         host: cmpt756s3
         port:
           number: 30003
-        subset: v1
+        subset: v2
