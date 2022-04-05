@@ -41,7 +41,7 @@ metadata:
     app: cmpt756s1
     version: v1
 spec:
-  replicas: 1
+  replicas: 25
   selector:
     matchLabels:
       app: cmpt756s1
@@ -60,19 +60,24 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 30000
+        resources:
+          requests:
+            cpu: 200m
         livenessProbe:
           httpGet:
             path: /api/v1/user/health
             port: 30000
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
           failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /api/v1/user/readiness
             port: 30000
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 5

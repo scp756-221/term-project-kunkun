@@ -41,7 +41,7 @@ metadata:
     app: cmpt756s3
     version: v1
 spec:
-  replicas: 1
+  replicas: 25
   selector:
     matchLabels:
       app: cmpt756s3
@@ -56,23 +56,28 @@ spec:
       serviceAccountName: svc-s3
       containers:
       - name: cmpt756s3
-        image: 'ghcr.io/jingshan-feng/cmpt756s3:v1'
+        image: 'ghcr.io/danleiqiang/cmpt756s3:v1'
         imagePullPolicy: Always
         ports:
         - containerPort: 30003
+        resources:
+          requests:
+            cpu: 200m
         livenessProbe:
           httpGet:
             path: /api/v1/comment/health
             port: 30003
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
           failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /api/v1/comment/readiness
             port: 30003
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 5
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 5

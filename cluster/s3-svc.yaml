@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cmpt756s3
+  labels:
+    app: cmpt756s2
+spec:
+  ports:
+  - port: 30003
+    name: http
+  selector:
+    app: cmpt756s3
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: svc-s3
+  labels:
+    account: SVC_S3

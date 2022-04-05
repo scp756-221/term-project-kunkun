@@ -67,7 +67,7 @@ def create_song(artist, title, uuid):
     return (response.json())
 
 
-def create_comment(text, music_id, song_title):
+def create_comment(text, song_title,music_id,uuid):
     """
     Create a song.
     If a record already exists with the same artist and title,
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     with open('{}/comment/comment.csv'.format(resource_dir), 'r') as inp:
         rdr = csv.reader(inp)
         next(rdr)  # Skip header
-        for text, music_id, song_title, uuid in rdr:
+        for text, song_title, music_id, uuid in rdr:
             resp = create_comment(text.strip(),
                                music_id.strip(),
                                song_title.strip(),

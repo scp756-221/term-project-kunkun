@@ -613,6 +613,12 @@ data:
               "interval": "",
               "legendFormat": "cmpt756s2",
               "refId": "C"
+            },
+            {
+              "expr": "sum(rate(flask_http_request_duration_seconds_sum{status=\"200\",service=\"cmpt756s3\"}[1m]))\n/\nsum(rate(flask_http_request_duration_seconds_count{status=\"200\",service=\"cmpt756s3\"}[1m]))",
+              "interval": "",
+              "legendFormat": "cmpt756s3",
+              "refId": "D"
             }
           ],
           "thresholds": [],
@@ -731,6 +737,12 @@ data:
               "interval": "",
               "legendFormat": "cmpt756s2",
               "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.5, sum by (le) (rate(flask_http_request_duration_seconds_bucket{service=\"cmpt756s3\",status=\"200\"}[1m])))",
+              "interval": "",
+              "legendFormat": "cmpt756s3",
+              "refId": "D"
             }
           ],
           "thresholds": [],
@@ -929,7 +941,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "avg by (service) (increase(flask_http_request_duration_seconds_bucket{status=\"200\",le=\"0.1\"}[5m]) \n/ ignoring (le) increase(flask_http_request_duration_seconds_count{status=\"200\"}[5m]))",
+              "expr": "avg by (service) (increase(flask_http_request_duration_seconds_bucket{status=\"200\",le=\"0.1\"}[5m]) \n/ ignoring (le) increase(flask_http_request_duration_seconds_count{status=\"200\"}[5m])>0)",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -1053,6 +1065,12 @@ data:
               "interval": "",
               "legendFormat": "cmpt756s2",
               "refId": "C"
+            },
+            {
+             "expr": "histogram_quantile(0.9, sum by (le) (rate(flask_http_request_duration_seconds_bucket{service=\"cmpt756s3\",status=\"200\"}[1m])))",
+             "interval": "",
+             "legendFormat": "cmpt756s3",
+             "refId": "D"
             }
           ],
           "thresholds": [],
@@ -1097,6 +1115,469 @@ data:
             "align": false,
             "alignLevel": null
           }
+        },
+        {
+         "aliasColors": {},
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": "$datasource",
+         "decimals": null,
+         "fill": 1,
+         "gridPos": {
+           "h": 6,
+           "w": 10,
+           "x": 0,
+           "y": 30
+         },
+         "id": 15,
+         "legend": {
+           "alignAsTable": true,
+           "avg": false,
+           "current": true,
+           "max": false,
+           "min": false,
+           "rightSide": true,
+           "show": true,
+           "sort": "avg",
+           "sortDesc": true,
+           "total": false,
+           "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 5,
+         "points": false,
+         "renderer": "flot",
+         "seriesOverrides": [],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+           {
+             "$$hashKey": "object:146",
+             "expr": "rate(flask_http_request_duration_seconds_sum{status=\"200\"}[2m])\n/\nrate(flask_http_request_duration_seconds_count{status=\"200\"}[2m])",
+             "format": "time_series",
+             "interval": "",
+             "intervalFactor": 1,
+             "legendFormat": "{{ path }}",
+             "refId": "A"
+           }
+         ],
+         "thresholds": [],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "Average response time [2m]",
+         "tooltip": {
+           "shared": true,
+           "sort": 0,
+           "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+           "buckets": null,
+           "mode": "time",
+           "name": null,
+           "show": true,
+           "values": []
+         },
+         "yaxes": [
+           {
+             "$$hashKey": "object:1004",
+             "decimals": null,
+             "format": "s",
+             "label": "",
+             "logBase": 1,
+             "max": null,
+             "min": null,
+             "show": true
+           },
+           {
+             "$$hashKey": "object:1005",
+             "format": "short",
+             "label": null,
+             "logBase": 1,
+             "max": null,
+             "min": null,
+             "show": true
+           }
+         ],
+         "yaxis": {
+           "align": false,
+           "alignLevel": null
+         }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "gridPos": {
+            "h": 6,
+            "w": 10,
+            "x": 0,
+            "y": 24
+          },
+          "id": 16,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "avg",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "$$hashKey": "object:214",
+              "expr": "rate(flask_http_request_duration_seconds_count{status=\"200\"}[1m])",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ path }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Requests per second",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:376",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:377",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "",
+          "fill": 1,
+          "gridPos": {
+            "h": 6,
+            "w": 10,
+            "x": 10,
+            "y": 24
+          },
+          "id": 17,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "sort": "avg",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "$$hashKey": "object:426",
+              "expr": "histogram_quantile(0.5, rate(flask_http_request_duration_seconds_bucket{status=\"200\"}[1m]))",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ path }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Request duration [s] - p50",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1280",
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1281",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+           "aliasColors": {},
+           "bars": false,
+           "dashLength": 10,
+           "dashes": false,
+           "datasource": "$datasource",
+           "fill": 1,
+           "gridPos": {
+             "h": 6,
+             "w": 10,
+             "x": 0,
+             "y": 36
+           },
+           "id": 18,
+           "legend": {
+             "alignAsTable": true,
+             "avg": false,
+             "current": true,
+             "max": false,
+             "min": false,
+             "rightSide": true,
+             "show": true,
+             "sort": "current",
+             "sortDesc": true,
+             "total": false,
+             "values": true
+           },
+           "lines": true,
+           "linewidth": 1,
+           "links": [],
+           "nullPointMode": "null",
+           "percentage": false,
+           "pointradius": 5,
+           "points": false,
+           "renderer": "flot",
+           "seriesOverrides": [],
+           "spaceLength": 10,
+           "stack": false,
+           "steppedLine": false,
+           "targets": [
+             {
+               "$$hashKey": "object:1079",
+               "expr": "increase(flask_http_request_duration_seconds_bucket{status=\"200\",le=\"0.25\"}[1m]) \n/ ignoring (le) increase(flask_http_request_duration_seconds_count{status=\"200\"}[1m])",
+               "format": "time_series",
+               "instant": false,
+               "interval": "",
+               "intervalFactor": 1,
+               "legendFormat": "{{ path }}",
+               "refId": "A"
+             }
+           ],
+           "thresholds": [],
+           "timeFrom": null,
+           "timeShift": null,
+           "title": "Requests under 250ms",
+           "tooltip": {
+             "shared": true,
+             "sort": 0,
+             "value_type": "individual"
+           },
+           "type": "graph",
+           "xaxis": {
+             "buckets": null,
+             "mode": "time",
+             "name": null,
+             "show": true,
+             "values": []
+           },
+           "yaxes": [
+             {
+               "$$hashKey": "object:1137",
+               "decimals": null,
+               "format": "percentunit",
+               "label": null,
+               "logBase": 1,
+               "max": "1",
+               "min": "0",
+               "show": true
+             },
+             {
+               "$$hashKey": "object:1138",
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+             }
+           ],
+           "yaxis": {
+             "align": false,
+             "alignLevel": null
+           }
+        },
+        {
+           "aliasColors": {},
+           "bars": false,
+           "dashLength": 10,
+           "dashes": false,
+           "datasource": "$datasource",
+           "fill": 1,
+           "gridPos": {
+             "h": 6,
+             "w": 10,
+             "x": 10,
+             "y": 30
+           },
+           "id": 20,
+           "legend": {
+             "alignAsTable": true,
+             "avg": true,
+             "current": true,
+             "max": true,
+             "min": true,
+             "rightSide": true,
+             "show": true,
+             "sort": "avg",
+             "sortDesc": true,
+             "total": false,
+             "values": true
+           },
+           "lines": true,
+           "linewidth": 1,
+           "links": [],
+           "nullPointMode": "null",
+           "percentage": false,
+           "pointradius": 5,
+           "points": false,
+           "renderer": "flot",
+           "seriesOverrides": [],
+           "spaceLength": 10,
+           "stack": false,
+           "steppedLine": false,
+           "targets": [
+             {
+               "$$hashKey": "object:426",
+               "expr": "histogram_quantile(0.9, rate(flask_http_request_duration_seconds_bucket{status=\"200\"}[1m]))",
+               "format": "time_series",
+               "interval": "",
+               "intervalFactor": 1,
+               "legendFormat": "{{ path }}",
+               "refId": "A"
+             }
+           ],
+           "thresholds": [],
+           "timeFrom": null,
+           "timeShift": null,
+           "title": "Request duration [s] - p90",
+           "tooltip": {
+             "shared": true,
+             "sort": 0,
+             "value_type": "individual"
+           },
+           "type": "graph",
+           "xaxis": {
+             "buckets": null,
+             "mode": "time",
+             "name": null,
+             "show": true,
+             "values": []
+           },
+           "yaxes": [
+             {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+             },
+             {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+             }
+           ],
+           "yaxis": {
+             "align": false,
+             "alignLevel": null
+           }
         }
       ],
       "refresh": "5s",
@@ -1153,7 +1634,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "c756 transactions",
+      "title": "Kunkun3 transactions",
       "uid": "u_DVKhQiz",
       "version": 9
     }
