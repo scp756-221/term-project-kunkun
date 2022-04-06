@@ -434,3 +434,7 @@ rollout-s3-2: s3-2 cluster/s3-dpl-v2.yaml cluster/s3-vs-v2.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s3-dpl-v2.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-v2.yaml
 	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s3-v2
+
+circuit-s3: cluster/s3-vs-circuit.yaml
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-circuit.yaml
+	$(KC) rollout -n $(APP_NS) restart deployment/cmpt756s3-v1
