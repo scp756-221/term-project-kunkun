@@ -4,55 +4,65 @@
 You will find resources for your assignments and term project here.
 
 ### 1. Instantiate the template files
-
-#### Fill in the required values in the template variable file
-
 Copy the file `cluster/tpl-vars-blank.txt` to `cluster/tpl-vars.txt`
 and fill in all the required values in `tpl-vars.txt`.  These include
 things like your AWS keys, your GitHub signon, and other identifying
-information.  See the comments in that file for details. Note that you
-will need to have installed Gatling
-(https://gatling.io/open-source/start-testing/) first, because you
-will be entering its path in `tpl-vars.txt`.
-
-#### Instantiate the templates
-
-Once you have filled in all the details, run
-
+information. 
+~~~
+$ tools/shell.sh
+~~~
 ~~~
 $ make -f k8s-tpl.mak templates
 ~~~
+### 2. Start cluster
+~~~
+make -f eks.mak start
+~~~
 
-This will check that all the programs you will need have been
-installed and are in the search path.  If any program is missing,
-install it before proceeding.
-
-The script will then generate makefiles personalized to the data that
-you entered in `clusters/tpl-vars.txt`.
-
-**Note:** This is the *only* time you will call `k8s-tpl.mak`
-directly. This creates all the non-templated files, such as
-`k8s.mak`.  You will use the non-templated makefiles in all the
-remaining steps.
-
-### 2. Ensure AWS DynamoDB is accessible/running
-
-Regardless of where your cluster will run, it uses AWS DynamoDB
-for its backend database. Check that you have the necessary tables
-installed by running
-
+### 3. Ensure AWS DynamoDB is initialized
 ~~~
 $ aws dynamodb list-tables
 ~~~
+The resulting output should include tables `User`, `Music` and `Comment`.
 
-The resulting output should include tables `User` and `Music`.
+### 4.Provision the cluster
+Create a namespace c756ns and set it as the default 
+~~~
+$ kubectl create ns c756ns
+$ kubectl config set-context --current --namespace=c756ns
+~~~
+Deploy all services
+~~~
+make -f k8s.mak provision
+~~~
 
-----
+### 5. Grafana and Kiali
 
-
-### 3. Ensure microservices is running
-
-1. Run container
+1. Print the Grafana URL and Kiali URL
+~~~
+make -f k8s.mak grafana-url
+~~~
+~~~
+make -f k8s.mak kiali-url
+~~~
+2. Start a new terminal window, send initial loads to the system. Change the number `10` to `100`, `500`, `1000` and observe the changes in grafana
+~~~
+./gatling-10-music.sh
+~~~
+~~~
+./gatling-10-comment.sh
+~~~
+~~~
+./gatling-10-user.sh
+~~~
+3. Stop gatling
+~~~
+tools/kill-gatling.sh
+~~~
+4. Close cluster
+~~~
+make -f eks.mak stop
+~~~
 
 ----
 
