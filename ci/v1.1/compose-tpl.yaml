@@ -43,6 +43,8 @@ services:
     container_name: cmpt756s2
     ports:
      - "30001:30001"
+    environment:
+      EXER: v1
   cmpt756s3:
     depends_on:
       - dynamodb-local
