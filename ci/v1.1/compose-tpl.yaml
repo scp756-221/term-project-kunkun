@@ -38,16 +38,18 @@ services:
     depends_on:
       - dynamodb-local
       - cmpt756db
-    build: ../s2/v1.1
+    build: ../s2/v1
     image: ci_s2
     container_name: cmpt756s2
     ports:
      - "30001:30001"
+    environment:
+      EXER: v1
   cmpt756s3:
     depends_on:
       - dynamodb-local
       - cmpt756db
-    build: ../s3
+    build: ../s3/v1
     image: ci_s3
     container_name: cmpt756s3
     ports:
