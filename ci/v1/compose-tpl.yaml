@@ -49,11 +49,13 @@ services:
     depends_on:
       - dynamodb-local
       - cmpt756db
-    build: ../s3
+    build: ../s3/v1
     image: ci_s3
     container_name: cmpt756s3
     ports:
       - "30003:30003"
+    environment:
+      EXER: v1
   test:
     command: "python ci_test.py cmpt756s1 30000 cmpt756s2 30001 cmpt756s3 30003 ZZ-REG-ID"
     depends_on:
