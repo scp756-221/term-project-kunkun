@@ -3,10 +3,30 @@
 
 ### File Structure
 
-Directory/file | Note
----- | ----- 
-s1/ | the User service
 
+Directory/file | 1st Sub Dir/file | 2nd Sub Dir/file| Note
+---- | ----- | ----- | ----- 
+.github/ | workflow/ | ci-system-v1.1.yml | CI test command
+ci/ | v1.1/ | compose.yaml | Set up an integration test of S3.
+ci/ | v1.1/ | conftest.py | Add S3 comment_address, comment_port and comment_url.
+ci/ | v1.1/ | create_tables.py | Create comment tables for CI test.
+ci/ | v1.1/ | Dockerfile | Add command to run CI test for S3 and add parameters for S3.
+ci/ | v1.1/ | flake-dirs.txt | Add directory path for S3.
+ci/ | v1.1/ | user.py | Python  API for the user service.
+ci/ | v1.1/ | test_user.py | CI test script for user service.
+ci/ | v1.1/ | comment.py | Python  API for the comment service.
+ci/ | v1.1/ | test_comment.py | CI test script for comment service.
+ci/ | create-local-tables.sh | - | Create comment  table in local DynamoDB
+cluster/ | - | - | Modify config files to support tests.
+gatling | simulations/proj756/ | ReadTables.scala | Add ReadTables.scala for s3
+gatling | test/ | - | Add gatling tests for comments which simulate 100, 500 and 1000 users access comment service
+loader/ | app.py | - | Add loader for comments.csv
+mcli/ | mcli.py | - | Client interaction with s1, s2, s3 and add a new monitor to the new service s3.
+s3/ | v1/ and v2/ | app.py | The Comment service.
+s3/ | v1/ and v2/ | Dockerfile | Command and port to run service.
+s3/ | v1/ and v2/ | requirement.txt | The versions of packages that service needs.
+eks-tpl.mak | - | - | Update the cluster configuration.
+k8s-tpl.mak | - | - |Add circuit breaker for s3
 
 ---
 
