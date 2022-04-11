@@ -1,58 +1,95 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-f059dc9a6f8d3a56e377f745f24479a46679e63a5d9fe6f495e02850cd0d8118.svg)](https://classroom.github.com/online_ide?assignment_repo_id=7037412&assignment_repo_type=AssignmentRepo)
 # CMPT 756 Project -- Team Kunkun
 
-You will find resources for your assignments and term project here.
+### File Structure
+
+
+Directory/file | 1st Sub Dir/file | 2nd Sub Dir/file| Note
+---- | ----- | ----- | ----- 
+.github/ | workflow/ | ci-system-v1.1.yml | CI test command
+ci/ | v1.1/ | compose.yaml | Set up an integration test of S3.
+ci/ | v1.1/ | conftest.py | Add S3 comment_address, comment_port and comment_url.
+ci/ | v1.1/ | create_tables.py | Create comment tables for CI test.
+ci/ | v1.1/ | Dockerfile | Add command to run CI test for S3 and add parameters for S3.
+ci/ | v1.1/ | flake-dirs.txt | Add directory path for S3.
+ci/ | v1.1/ | user.py | Python  API for the user service.
+ci/ | v1.1/ | test_user.py | CI test script for user service.
+ci/ | v1.1/ | comment.py | Python  API for the comment service.
+ci/ | v1.1/ | test_comment.py | CI test script for comment service.
+ci/ | create-local-tables.sh | - | Create comment  table in local DynamoDB
+cluster/ | - | - | Modify config files to support tests.
+gatling | simulations/proj756/ | ReadTables.scala | Add ReadTables.scala for s3
+gatling | test/ | - | Add gatling tests for comments which simulate 100, 500 and 1000 users access comment service
+loader/ | app.py | - | Add loader for comments.csv
+mcli/ | mcli.py | - | Client interaction with s1, s2, s3 and add a new monitor to the new service s3.
+s3/ | v1/ and v2/ | app.py | The Comment service.
+s3/ | v1/ and v2/ | Dockerfile | Command and port to run service.
+s3/ | v1/ and v2/ | requirement.txt | The versions of packages that service needs.
+eks-tpl.mak | - | - | Update the cluster configuration.
+k8s-tpl.mak | - | - |Add circuit breaker for s3
+
+---
 
 ### 1. Instantiate the template files
-
-#### Fill in the required values in the template variable file
-
 Copy the file `cluster/tpl-vars-blank.txt` to `cluster/tpl-vars.txt`
 and fill in all the required values in `tpl-vars.txt`.  These include
 things like your AWS keys, your GitHub signon, and other identifying
-information.  See the comments in that file for details. Note that you
-will need to have installed Gatling
-(https://gatling.io/open-source/start-testing/) first, because you
-will be entering its path in `tpl-vars.txt`.
-
-#### Instantiate the templates
-
-Once you have filled in all the details, run
-
+information. 
+~~~
+$ tools/shell.sh
+~~~
 ~~~
 $ make -f k8s-tpl.mak templates
 ~~~
+### 2. Start cluster
+~~~
+make -f eks.mak start
+~~~
 
-This will check that all the programs you will need have been
-installed and are in the search path.  If any program is missing,
-install it before proceeding.
-
-The script will then generate makefiles personalized to the data that
-you entered in `clusters/tpl-vars.txt`.
-
-**Note:** This is the *only* time you will call `k8s-tpl.mak`
-directly. This creates all the non-templated files, such as
-`k8s.mak`.  You will use the non-templated makefiles in all the
-remaining steps.
-
-### 2. Ensure AWS DynamoDB is accessible/running
-
-Regardless of where your cluster will run, it uses AWS DynamoDB
-for its backend database. Check that you have the necessary tables
-installed by running
-
+### 3. Ensure AWS DynamoDB is initialized
 ~~~
 $ aws dynamodb list-tables
 ~~~
+The resulting output should include tables `User`, `Music` and `Comment`.
 
-The resulting output should include tables `User` and `Music`.
+### 4.Provision the cluster
+Create a namespace c756ns and set it as the default 
+~~~
+$ kubectl create ns c756ns
+$ kubectl config set-context --current --namespace=c756ns
+~~~
+Deploy all services
+~~~
+make -f k8s.mak provision
+~~~
 
-----
+### 5. Grafana and Kiali
 
-
-### 3. Ensure microservices is running
-
-1. Run container
+1. Print the Grafana URL and Kiali URL
+~~~
+make -f k8s.mak grafana-url
+~~~
+~~~
+make -f k8s.mak kiali-url
+~~~
+2. Start a new terminal window, send initial loads to the system. Change the number `10` to `100`, `500`, `1000` and observe the changes in grafana
+~~~
+./gatling-10-music.sh
+~~~
+~~~
+./gatling-10-comment.sh
+~~~
+~~~
+./gatling-10-user.sh
+~~~
+3. Stop gatling
+~~~
+tools/kill-gatling.sh
+~~~
+4. Close cluster
+~~~
+make -f eks.mak stop
+~~~
 
 ----
 
